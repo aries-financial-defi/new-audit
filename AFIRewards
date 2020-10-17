@@ -728,7 +728,7 @@ contract YearnRewards is LPTokenWrapper, IRewardDistributionRecipient {
     //IERC20 public yfi = IERC20(0xB1Eb306c541D3f89B0D90706d8834BD134Eeb3Cc);
     /* Address needs to be updated */
     IERC20 public afi = IERC20(0xB1Eb306c541D3f89B0D90706d8834BD134Eeb3Cc);
-    uint256 public constant DURATION = 28 days;
+    uint256 public constant DURATION = 730 days;
 
     mapping(address => uint256) public rewards;
 
@@ -742,7 +742,7 @@ contract YearnRewards is LPTokenWrapper, IRewardDistributionRecipient {
     uint256 public earnings_per_share; //每股分红
     uint256 public lastblock; //上次修改每股分红的时间
     uint256 public starttime = 111; //
-    uint256 public DailyOutput = 13928 * 1e18; //390000/28
+    uint256 public DailyOutput = 4274 * 1e18; //3,120,000/730
     uint256 public Halvetime; //减半的时间
 
     event DailyOutputChanege(uint256 dailyOutput);
