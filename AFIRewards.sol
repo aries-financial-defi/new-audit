@@ -1,9 +1,14 @@
+/**
+ *Submitted for verification at Etherscan.io on 2020-07-19
+*/
+
 /*
    ____            __   __        __   _
   / __/__ __ ___  / /_ / /  ___  / /_ (_)__ __
  _\ \ / // // _ \/ __// _ \/ -_)/ __// / \ \ /
 /___/ \_, //_//_/\__//_//_/\__/ \__//_/ /_\_\
      /___/
+
 * Synthetix: YFIRewards.sol
 *
 * Docs: https://docs.synthetix.io/
@@ -60,7 +65,7 @@ library Math {
      */
     function average(uint256 a, uint256 b) internal pure returns (uint256) {
         // (a + b) / 2 can overflow, so we distribute
-        return (a / 2) + (b / 2) + (((a % 2) + (b % 2)) / 2);
+        return (a / 2) + (b / 2) + ((a % 2 + b % 2) / 2);
     }
 }
 
@@ -122,11 +127,7 @@ library SafeMath {
      *
      * _Available since v2.4.0._
      */
-    function sub(
-        uint256 a,
-        uint256 b,
-        string memory errorMessage
-    ) internal pure returns (uint256) {
+    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b <= a, errorMessage);
         uint256 c = a - b;
 
@@ -184,11 +185,7 @@ library SafeMath {
      *
      * _Available since v2.4.0._
      */
-    function div(
-        uint256 a,
-        uint256 b,
-        string memory errorMessage
-    ) internal pure returns (uint256) {
+    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         // Solidity only automatically asserts when dividing by 0
         require(b > 0, errorMessage);
         uint256 c = a / b;
@@ -225,11 +222,7 @@ library SafeMath {
      *
      * _Available since v2.4.0._
      */
-    function mod(
-        uint256 a,
-        uint256 b,
-        string memory errorMessage
-    ) internal pure returns (uint256) {
+    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
         require(b != 0, errorMessage);
         return a % b;
     }
@@ -252,8 +245,7 @@ pragma solidity ^0.5.0;
 contract Context {
     // Empty internal constructor, to prevent people from mistakenly deploying
     // an instance of this contract, which should be used via inheritance.
-    constructor() internal {}
-
+    constructor () internal { }
     // solhint-disable-previous-line no-empty-blocks
 
     function _msgSender() internal view returns (address payable) {
@@ -282,15 +274,12 @@ pragma solidity ^0.5.0;
 contract Ownable is Context {
     address private _owner;
 
-    event OwnershipTransferred(
-        address indexed previousOwner,
-        address indexed newOwner
-    );
+    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    constructor() internal {
+    constructor () internal {
         _owner = _msgSender();
         emit OwnershipTransferred(address(0), _owner);
     }
@@ -341,10 +330,7 @@ contract Ownable is Context {
      * @dev Transfers ownership of the contract to a new account (`newOwner`).
      */
     function _transferOwnership(address newOwner) internal {
-        require(
-            newOwner != address(0),
-            "Ownable: new owner is the zero address"
-        );
+        require(newOwner != address(0), "Ownable: new owner is the zero address");
         emit OwnershipTransferred(_owner, newOwner);
         _owner = newOwner;
     }
@@ -376,11 +362,7 @@ interface IERC20 {
      *
      * Emits a {Transfer} event.
      */
-    function transfer(address recipient, uint256 amount)
-        external
-        returns (bool);
-
-    function mint(address account, uint256 amount) external;
+    function transfer(address recipient, uint256 amount) external returns (bool);
 
     /**
      * @dev Returns the remaining number of tokens that `spender` will be
@@ -389,10 +371,7 @@ interface IERC20 {
      *
      * This value changes when {approve} or {transferFrom} are called.
      */
-    function allowance(address owner, address spender)
-        external
-        view
-        returns (uint256);
+    function allowance(address owner, address spender) external view returns (uint256);
 
     /**
      * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
@@ -419,11 +398,7 @@ interface IERC20 {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
 
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to
@@ -437,11 +412,7 @@ interface IERC20 {
      * @dev Emitted when the allowance of a `spender` for an `owner` is set by
      * a call to {approve}. `value` is the new allowance.
      */
-    event Approval(
-        address indexed owner,
-        address indexed spender,
-        uint256 value
-    );
+    event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
 // File: @openzeppelin/contracts/utils/Address.sol
@@ -472,14 +443,9 @@ library Address {
         // and 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470 is returned
         // for accounts without code, i.e. `keccak256('')`
         bytes32 codehash;
-
-
-            bytes32 accountHash
-         = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
+        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         // solhint-disable-next-line no-inline-assembly
-        assembly {
-            codehash := extcodehash(account)
-        }
+        assembly { codehash := extcodehash(account) }
         return (codehash != 0x0 && codehash != accountHash);
     }
 
@@ -489,11 +455,7 @@ library Address {
      *
      * _Available since v2.4.0._
      */
-    function toPayable(address account)
-        internal
-        pure
-        returns (address payable)
-    {
+    function toPayable(address account) internal pure returns (address payable) {
         return address(uint160(account));
     }
 
@@ -516,23 +478,20 @@ library Address {
      * _Available since v2.4.0._
      */
     function sendValue(address payable recipient, uint256 amount) internal {
-        require(
-            address(this).balance >= amount,
-            "Address: insufficient balance"
-        );
+        require(address(this).balance >= amount, "Address: insufficient balance");
 
         // solhint-disable-next-line avoid-call-value
         (bool success, ) = recipient.call.value(amount)("");
-        require(
-            success,
-            "Address: unable to send value, recipient may have reverted"
-        );
+        require(success, "Address: unable to send value, recipient may have reverted");
     }
 }
 
 // File: @openzeppelin/contracts/token/ERC20/SafeERC20.sol
 
 pragma solidity ^0.5.0;
+
+
+
 
 /**
  * @title SafeERC20
@@ -547,83 +506,33 @@ library SafeERC20 {
     using SafeMath for uint256;
     using Address for address;
 
-    function safeTransfer(
-        IERC20 token,
-        address to,
-        uint256 value
-    ) internal {
-        callOptionalReturn(
-            token,
-            abi.encodeWithSelector(token.transfer.selector, to, value)
-        );
+    function safeTransfer(IERC20 token, address to, uint256 value) internal {
+        callOptionalReturn(token, abi.encodeWithSelector(token.transfer.selector, to, value));
     }
 
-    function safeTransferFrom(
-        IERC20 token,
-        address from,
-        address to,
-        uint256 value
-    ) internal {
-        callOptionalReturn(
-            token,
-            abi.encodeWithSelector(token.transferFrom.selector, from, to, value)
-        );
+    function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
+        callOptionalReturn(token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
     }
 
-    function safeApprove(
-        IERC20 token,
-        address spender,
-        uint256 value
-    ) internal {
+    function safeApprove(IERC20 token, address spender, uint256 value) internal {
         // safeApprove should only be called when setting an initial allowance,
         // or when resetting it to zero. To increase and decrease it, use
         // 'safeIncreaseAllowance' and 'safeDecreaseAllowance'
         // solhint-disable-next-line max-line-length
-        require(
-            (value == 0) || (token.allowance(address(this), spender) == 0),
+        require((value == 0) || (token.allowance(address(this), spender) == 0),
             "SafeERC20: approve from non-zero to non-zero allowance"
         );
-        callOptionalReturn(
-            token,
-            abi.encodeWithSelector(token.approve.selector, spender, value)
-        );
+        callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, value));
     }
 
-    function safeIncreaseAllowance(
-        IERC20 token,
-        address spender,
-        uint256 value
-    ) internal {
-        uint256 newAllowance = token.allowance(address(this), spender).add(
-            value
-        );
-        callOptionalReturn(
-            token,
-            abi.encodeWithSelector(
-                token.approve.selector,
-                spender,
-                newAllowance
-            )
-        );
+    function safeIncreaseAllowance(IERC20 token, address spender, uint256 value) internal {
+        uint256 newAllowance = token.allowance(address(this), spender).add(value);
+        callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 
-    function safeDecreaseAllowance(
-        IERC20 token,
-        address spender,
-        uint256 value
-    ) internal {
-        uint256 newAllowance = token.allowance(address(this), spender).sub(
-            value,
-            "SafeERC20: decreased allowance below zero"
-        );
-        callOptionalReturn(
-            token,
-            abi.encodeWithSelector(
-                token.approve.selector,
-                spender,
-                newAllowance
-            )
-        );
+    function safeDecreaseAllowance(IERC20 token, address spender, uint256 value) internal {
+        uint256 newAllowance = token.allowance(address(this), spender).sub(value, "SafeERC20: decreased allowance below zero");
+        callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 
     /**
@@ -647,13 +556,9 @@ library SafeERC20 {
         (bool success, bytes memory returndata) = address(token).call(data);
         require(success, "SafeERC20: low-level call failed");
 
-        if (returndata.length > 0) {
-            // Return data is optional
+        if (returndata.length > 0) { // Return data is optional
             // solhint-disable-next-line max-line-length
-            require(
-                abi.decode(returndata, (bool)),
-                "SafeERC20: ERC20 operation did not succeed"
-            );
+            require(abi.decode(returndata, (bool)), "SafeERC20: ERC20 operation did not succeed");
         }
     }
 }
@@ -662,16 +567,15 @@ library SafeERC20 {
 
 pragma solidity ^0.5.0;
 
+
+
 contract IRewardDistributionRecipient is Ownable {
     address rewardDistribution;
 
     function notifyRewardAmount(uint256 reward) external;
 
     modifier onlyRewardDistribution() {
-        require(
-            _msgSender() == rewardDistribution,
-            "Caller is not reward distribution"
-        );
+        require(_msgSender() == rewardDistribution, "Caller is not reward distribution");
         _;
     }
 
@@ -683,22 +587,20 @@ contract IRewardDistributionRecipient is Ownable {
     }
 }
 
-
 // File: contracts/CurveRewards.sol
 
 pragma solidity ^0.5.0;
 
-interface IFreeFromUpTo {
-    function freeFromUpTo(address from, uint256 value)
-        external
-        returns (uint256 freed);
-}
+
+
+
+
 
 contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    IERC20 public y = IERC20(0xF3fb6D4a239981Fe39C351406A7Ab0a82056a7D2);
+    IERC20 public bpt = IERC20(0x95C4B6C7CfF608c0CA048df8b81a484aA377172B);
 
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
@@ -714,148 +616,285 @@ contract LPTokenWrapper {
     function stake(uint256 amount) public {
         _totalSupply = _totalSupply.add(amount);
         _balances[msg.sender] = _balances[msg.sender].add(amount);
-        y.safeTransferFrom(msg.sender, address(this), amount);
+        bpt.safeTransferFrom(msg.sender, address(this), amount);
     }
 
     function withdraw(uint256 amount) public {
         _totalSupply = _totalSupply.sub(amount);
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
-        y.safeTransfer(msg.sender, amount);
+        bpt.safeTransfer(msg.sender, amount);
     }
 }
 
-contract YearnRewards is LPTokenWrapper, IRewardDistributionRecipient {
-    //IERC20 public yfi = IERC20(0xB1Eb306c541D3f89B0D90706d8834BD134Eeb3Cc);
-    /* Address needs to be updated */
-    IERC20 public afi = IERC20(0xB1Eb306c541D3f89B0D90706d8834BD134Eeb3Cc);
-    uint256 public constant DURATION = 730 days;
+contract YearnGovernance is LPTokenWrapper, IRewardDistributionRecipient {
+    
+    /* Fee collection for any other token */
+    
+    function seize(IERC20 _token, uint amount) external {
+        require(msg.sender == governance, "!governance");
+        require(_token != feesPaidIn, "feesPaidIn");
+        require(_token != afi, "afi");
+        require(_token != bpt, "bpt");
+        _token.safeTransfer(governance, amount);
+    }
+    
+    /* Fees breaker, to protect withdraws if anything ever goes wrong */
+    
+    bool public breaker = false;
+    
+    function setBreaker(bool _breaker) external {
+        require(msg.sender == governance, "!governance");
+        breaker = _breaker;
+    }
+    
+    /* Modifications for fees claimable */
+    
+    uint256 public yIndex = 0; // previously accumulated index
+    uint256 public yBal = 0; // previous calculated balance of COMP
 
+    mapping(address => uint256) public ySupplyIndex;
+    
+    IERC20 public feesPaidIn = IERC20(0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8); 
+    
+    function setReward(IERC20 _feesPaidIn) public {
+        require(msg.sender == governance, "!governance");
+        feesPaidIn = _feesPaidIn;
+    }
+
+    function claimFees() public {
+        _claimFor(msg.sender);
+    }
+
+    function _claimFor(address recipient) internal {
+        updateFees();
+        uint256 _supplied = balanceOf(recipient);
+        if (_supplied > 0) {
+            uint256 _supplyIndex = ySupplyIndex[recipient];
+            ySupplyIndex[recipient] = yIndex;
+            uint256 _delta = yIndex.sub(_supplyIndex);
+            if (_delta > 0) {
+              uint256 _share = _supplied.mul(_delta).div(1e18);
+
+              IERC20(feesPaidIn).safeTransfer(recipient, _share);
+              yBal = IERC20(feesPaidIn).balanceOf(address(this));
+            }
+        } else {
+            ySupplyIndex[recipient] = yIndex;
+        }
+    }
+    
+    function updateFees() public {
+        if (totalSupply() > 0) {
+            uint256 _yBal = IERC20(feesPaidIn).balanceOf(address(this));
+            if (_yBal > 0) {
+                uint256 _diff = _yBal.sub(yBal);
+                if (_diff > 0) {
+                    uint256 _ratio = _diff.mul(1e18).div(totalSupply());
+                    if (_ratio > 0) {
+                      yIndex = yIndex.add(_ratio);
+                      yBal = _yBal;
+                    }
+                }
+            }
+        }
+    }
+    
+    /* Modifications for proposals */
+    
+    mapping(address => uint) public voteLock; // period that your sake it locked to keep it for voting
+    
+    struct Proposal {
+        uint id;
+        address proposer;
+        mapping(address => uint) forVotes;
+        mapping(address => uint) againstVotes;
+        uint totalForVotes;
+        uint totalAgainstVotes;
+        uint start; // block start;
+        uint end; // start + period
+    }
+    
+    mapping (uint => Proposal) public proposals;
+    uint public proposalCount;
+    uint public period = 17280; // voting period in blocks ~ 17280 3 days for 15s/block
+    uint public lock = 17280; // vote lock in blocks ~ 17280 3 days for 15s/block
+    uint public minimum = 1e18;
+    bool public config = true;
+    
+    
+    address public governance;
+    
+    function setGovernance(address _governance) public {
+        require(msg.sender == governance, "!governance");
+        governance = _governance;
+    }
+    
+    function setMinimum(uint _minimum) public {
+        require(msg.sender == governance, "!governance");
+        minimum = _minimum;
+    }
+    
+    function setPeriod(uint _period) public {
+        require(msg.sender == governance, "!governance");
+        period = _period;
+    }
+    
+    function setLock(uint _lock) public {
+        require(msg.sender == governance, "!governance");
+        lock = _lock;
+    }
+    
+    function initialize() public {
+        require(config == true, "!config");
+        config = false;
+        governance = msg.sender;
+    }
+    
+    function propose() public {
+        require(balanceOf(msg.sender) > minimum, "<minimum");
+        proposals[proposalCount++] = Proposal({
+            id: proposalCount,
+            proposer: msg.sender,
+            totalForVotes: 0,
+            totalAgainstVotes: 0,
+            start: block.number,
+            end: period.add(block.number)
+        });
+        
+        voteLock[msg.sender] = lock.add(block.number);
+    }
+    
+    function voteFor(uint id) public {
+        require(proposals[id].start < block.number , "<start");
+        require(proposals[id].end > block.number , ">end");
+        uint votes = balanceOf(msg.sender).sub(proposals[id].forVotes[msg.sender]);
+        proposals[id].totalForVotes = proposals[id].totalForVotes.add(votes);
+        proposals[id].forVotes[msg.sender] = balanceOf(msg.sender);
+        
+        voteLock[msg.sender] = lock.add(block.number);
+        
+        if (breaker == false) {
+            claimFees();
+        }
+    }
+    
+    function voteAgainst(uint id) public {
+        require(proposals[id].start < block.number , "<start");
+        require(proposals[id].end > block.number , ">end");
+        uint votes = balanceOf(msg.sender).sub(proposals[id].againstVotes[msg.sender]);
+        proposals[id].totalAgainstVotes = proposals[id].totalAgainstVotes.add(votes);
+        proposals[id].againstVotes[msg.sender] = balanceOf(msg.sender);
+        
+        voteLock[msg.sender] = lock.add(block.number);
+        
+        if (breaker == false) {
+            claimFees();
+        }
+    }
+    
+    /* Default rewards contract */
+    //need update to AFI
+    //IERC20 public yfi = IERC20(0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e);
+    IERC20 public afi = IERC20(0x0);
+    
+    uint256 public constant DURATION = 1170 days;//39 month 30 days a month
+
+    uint256 public periodFinish = 0;
+    uint256 public rewardRate = 0;
+    uint256 public lastUpdateTime;
+    uint256 public rewardPerTokenStored;
+    mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public rewards;
 
-    //每股分红算法：
-    //维护一个全局的每股分红金额 earnings_per_share
-    //每当有新的代币进来分红，新的每股分红金额+= 进来的代币数量/总质押数  make_profit
-    // 每当有人质押的时候 ,他的已经分红金额为  已经分红金额+=每股分红金额*质押数量 stake
-    //每当有人解压的时候 , 他的已经分红金额为  已经分红金额-=每股分红金额*质押数量  withdraw
-    // 领取分红 为 每股分红金额*质押数量 - 已经分红金额 getReward
-
-    uint256 public earnings_per_share; //每股分红
-    uint256 public lastblock; //上次修改每股分红的时间
-    uint256 public starttime = 111; //
-    uint256 public DailyOutput = 4274 * 1e18; //3,120,000/730
-    uint256 public Halvetime; //减半的时间
-
-    event DailyOutputChanege(uint256 dailyOutput);
+    event RewardAdded(uint256 reward);
     event Staked(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
     event RewardPaid(address indexed user, uint256 reward);
 
-    //chi
-    // IFreeFromUpTo public constant chi = IFreeFromUpTo(
-    //     0x0000000000004946c0e9F43F4Dee607b0eF1fA1c
-    // );
-    // modifier discountCHI {
-    //     uint256 gasStart = gasleft();
-    //     _;
-    //     uint256 gasSpent = 21000 + gasStart - gasleft() + 16 * msg.data.length;
-    //     chi.freeFromUpTo(msg.sender, (gasSpent + 14154) / 41130);
-    // }
-
-    constructor ()public{
-        Halvetime = block.timestamp + DURATION;
-    }
-
-    //求出每个区块产出多少代币.
-    function getPerBlockOutput() public view returns (uint256) {
-        return DailyOutput.div(6646);// 13秒1个区块,每天大概是6646个区块 //https://etherscan.io/chart/blocktime
-    }
-
-    //上次到现在一共要分的代币是多少
-    function getprofit() private returns (uint256) {
-        if (block.timestamp > Halvetime){
-            DailyOutput = DailyOutput.div(2); //减半
-            Halvetime = block.timestamp + DURATION;
-        }
-        uint256 new_blocknum = block.number;
-        if (new_blocknum <= lastblock) {
-            return 0;
-        }
-        uint256 diff = new_blocknum.sub(lastblock);
-        lastblock = new_blocknum;
-        uint256 profit = diff.mul(getPerBlockOutput());
-        return profit;
-    }
-
-    modifier make_profit() {
-        uint256 amount = getprofit();
-        if (amount > 0) {
-            afi.mint(address(this), amount);
-            if (totalSupply() == 0){
-                earnings_per_share = 0;
-            }else{
-                earnings_per_share = earnings_per_share.add(
-                amount.div(totalSupply())
-            );
-            }
-
+    modifier updateReward(address account) {
+        rewardPerTokenStored = rewardPerToken();
+        lastUpdateTime = lastTimeRewardApplicable();
+        if (account != address(0)) {
+            rewards[account] = earned(account);
+            userRewardPerTokenPaid[account] = rewardPerTokenStored;
         }
         _;
     }
 
-    function earned(address account) public view returns (uint256) {
-        uint256 _cal = earnings_per_share.mul(balanceOf(account));
-        if (_cal < rewards[msg.sender]) {
-            return 0;
-        } else {
-            return _cal.sub(rewards[msg.sender]);
+    function lastTimeRewardApplicable() public view returns (uint256) {
+        return Math.min(block.timestamp, periodFinish);
+    }
+
+    function rewardPerToken() public view returns (uint256) {
+        if (totalSupply() == 0) {
+            return rewardPerTokenStored;
         }
+        return
+            rewardPerTokenStored.add(
+                lastTimeRewardApplicable()
+                    .sub(lastUpdateTime)
+                    .mul(rewardRate)
+                    .mul(1e18)
+                    .div(totalSupply())
+            );
+    }
+
+    function earned(address account) public view returns (uint256) {
+        return
+            balanceOf(account)
+                .mul(rewardPerToken().sub(userRewardPerTokenPaid[account]))
+                .div(1e18)
+                .add(rewards[account]);
     }
 
     // stake visibility is public as overriding LPTokenWrapper's stake() function
-    function stake(uint256 amount) public make_profit  {
-        require(block.timestamp >starttime,"not start");
+    function stake(uint256 amount) public updateReward(msg.sender) {
         require(amount > 0, "Cannot stake 0");
-        if (earnings_per_share == 0){
-            rewards[msg.sender] = 0;
-        }else{
-            rewards[msg.sender] = rewards[msg.sender].add(
-                earnings_per_share.mul(amount)
-            );
+        if (breaker == false) {
+            claimFees();
         }
         super.stake(amount);
         emit Staked(msg.sender, amount);
     }
 
-    function withdraw(uint256 amount) public make_profit
-    {
+    function withdraw(uint256 amount) public updateReward(msg.sender) {
         require(amount > 0, "Cannot withdraw 0");
-        getReward();
-
-        rewards[msg.sender] = rewards[msg.sender].sub(
-            earnings_per_share.mul(amount)
-        );
+        if (breaker == false) {
+            require(voteLock[msg.sender] < block.number,"!locked");
+            claimFees();
+        }
         super.withdraw(amount);
         emit Withdrawn(msg.sender, amount);
     }
 
     function exit() external {
         withdraw(balanceOf(msg.sender));
+        getReward();
     }
 
-    function getReward() public make_profit  {
+    function getReward() public updateReward(msg.sender) {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
-            rewards[msg.sender] = earnings_per_share.mul(balanceOf(msg.sender));
+            rewards[msg.sender] = 0;
             afi.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
 
-    function notifyRewardAmount(uint256 _dailyOutput)
+    function notifyRewardAmount(uint256 reward)
         external
         onlyRewardDistribution
+        updateReward(address(0))
     {
-        DailyOutput = _dailyOutput;
-        emit DailyOutputChanege(_dailyOutput);
+        if (block.timestamp >= periodFinish) {
+            rewardRate = reward.div(DURATION);
+        } else {
+            uint256 remaining = periodFinish.sub(block.timestamp);
+            uint256 leftover = remaining.mul(rewardRate);
+            rewardRate = reward.add(leftover).div(DURATION);
+        }
+        lastUpdateTime = block.timestamp;
+        periodFinish = block.timestamp.add(DURATION);
+        emit RewardAdded(reward);
     }
 }
