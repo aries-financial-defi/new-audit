@@ -152,7 +152,8 @@ contract TreasuryVault {
     address public governance;
     address public onesplit;
     address public rewards = address(0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8);
-    address public ygov = address(0xBa37B002AbaFDd8E89a1995dA52740bbC013D992);
+    //change to AFIRewards.sol address
+    address public ygov = address(0xE8B7eB8629e4FF2bC5a0d10933AF6569261C445D);
     
     mapping(address => bool) authorized;
     

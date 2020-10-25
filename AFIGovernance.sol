@@ -600,7 +600,7 @@ contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     // need change to AFI Token address
-    IERC20 public vote = IERC20(0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e);
+    IERC20 public vote = IERC20(0x68E8A20128e1902C02f533a02eD0cFd8396E3Fbc);
 
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
@@ -630,7 +630,7 @@ interface Executor {
     function execute(uint, uint, uint, uint) external;
 }
 
-contract YearnGovernance is LPTokenWrapper, IRewardDistributionRecipient {
+contract AFIGovernance is LPTokenWrapper, IRewardDistributionRecipient {
     
     /* Fee collection for any other token */
     
@@ -711,7 +711,8 @@ contract YearnGovernance is LPTokenWrapper, IRewardDistributionRecipient {
         require(config == true, "!config");
         config = false;
         proposalCount = id;
-        governance = 0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52;
+        // chqnge to multi-sig
+        governance = 0xdD21F15B0e55fda1D690d873A19b28b3458d3236;
     }
     
     event NewProposal(uint id, address creator, uint start, uint duration, address executor);
