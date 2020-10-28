@@ -198,7 +198,7 @@ contract AFI is ERC20, ERC20Detailed {
     address public governance;
     mapping (address => bool) public minters;
 
-    constructor () public ERC20Detailed("AriesFinance", "AFI", 18) {
+    constructor () public ERC20Detailed("AriesFinancial", "AFI", 18) {
         governance = msg.sender;
     }
 
