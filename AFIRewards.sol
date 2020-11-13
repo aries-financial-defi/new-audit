@@ -1,8 +1,6 @@
 /**
- *Submitted for verification at Etherscan.io on 2020-07-17
-*/
+ *Submitted for verification at Etherscan.io on 2020-11-17
 
-/*
    ____            __   __        __   _
   / __/__ __ ___  / /_ / /  ___  / /_ (_)__ __
  _\ \ / // // _ \/ __// _ \/ -_)/ __// / \ \ /
@@ -490,9 +488,6 @@ library Address {
 
 pragma solidity ^0.5.0;
 
-
-
-
 /**
  * @title SafeERC20
  * @dev Wrappers around ERC20 operations that throw on failure (when the token
@@ -567,8 +562,6 @@ library SafeERC20 {
 
 pragma solidity ^0.5.0;
 
-
-
 contract IRewardDistributionRecipient is Ownable {
     address rewardDistribution;
 
@@ -591,16 +584,12 @@ contract IRewardDistributionRecipient is Ownable {
 
 pragma solidity ^0.5.0;
 
-
-
-
-
-
 contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    IERC20 public y = IERC20(0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8);
+    //IERC20 public y = IERC20(0xdF5e0e81Dff6FAF3A7e52BA697820c5e32D806A8);
+    IERC20 public lpToken;
 
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
@@ -616,19 +605,23 @@ contract LPTokenWrapper {
     function stake(uint256 amount) public {
         _totalSupply = _totalSupply.add(amount);
         _balances[msg.sender] = _balances[msg.sender].add(amount);
-        y.safeTransferFrom(msg.sender, address(this), amount);
+        lpToken.safeTransferFrom(msg.sender, address(this), amount);
     }
 
     function withdraw(uint256 amount) public {
         _totalSupply = _totalSupply.sub(amount);
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
-        y.safeTransfer(msg.sender, amount);
+        lpToken.safeTransfer(msg.sender, amount);
+    }
+    
+    function setLpToken(address _lpToken) public {
+        lpToken = IERC20(_lpToken);
     }
 }
 
 contract AFIRewards is LPTokenWrapper, IRewardDistributionRecipient {
     IERC20 public afi = IERC20(0x68E8A20128e1902C02f533a02eD0cFd8396E3Fbc);
-    uint256 public constant DURATION = 2340 days;
+    uint256 public constant DURATION = 7 days;
 
     uint256 public periodFinish = 0;
     uint256 public rewardRate = 0;
@@ -652,6 +645,10 @@ contract AFIRewards is LPTokenWrapper, IRewardDistributionRecipient {
         _;
     }
 
+     constructor(address _lpToken) public {
+        super.setLpToken(_lpToken);
+    }
+    
     function lastTimeRewardApplicable() public view returns (uint256) {
         return Math.min(block.timestamp, periodFinish);
     }
