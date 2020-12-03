@@ -176,9 +176,11 @@ contract StrategyDForceDAI {
 
     uint public strategyfee = 0;
     uint public fee = 400;
-    uint public burnfee = 500;
     uint public callfee = 100;
     uint constant public max = 1000;
+
+    uint public performanceFee = 30000;
+    uint constant public performanceMax = 30000;
 
     uint public withdrawalFee = 0;
     uint constant public withdrawalMax = 10000;
@@ -186,11 +188,10 @@ contract StrategyDForceDAI {
     address public governance;
     address public strategyDev;
     address public controller;
-    //address public burnAddress = 0xB6af2DabCEBC7d30E440714A33E5BD45CEEd103a;
 
     string public getName;
 
-    address[] public swap2YFIIRouting;
+    address[] public swap2AFIRouting;
     address[] public swap2TokenRouting;
 
 
@@ -202,7 +203,7 @@ contract StrategyDForceDAI {
             abi.encodePacked(IERC20(want).name(),"DF Token"
             )
             ));
-        swap2YFIIRouting = [output,weth,afi];
+        swap2AFIRouting = [output,weth,afi];
         swap2TokenRouting = [output,weth,want];
         doApprove();
         strategyDev = tx.origin;
@@ -299,12 +300,10 @@ contract StrategyDForceDAI {
     }
     function dosplit() internal{
         uint b = IERC20(afi).balanceOf(address(this));
-        uint _fee = b.mul(fee).div(max);
+        uint _fee = b.mul(performanceFee).div(performanceMax);
         uint _callfee = b.mul(callfee).div(max);
-        uint _burnfee = b.mul(burnfee).div(max);
         IERC20(afi).safeTransfer(Controller(controller).rewards(), _fee); //4%  3% team +1% insurance
         IERC20(afi).safeTransfer(msg.sender, _callfee); //call fee 1%
-        //IERC20(afi).safeTransfer(burnAddress, _burnfee); //burn fee 5%
 
         if (strategyfee >0){
             uint _strategyfee = b.mul(strategyfee).div(max);
@@ -368,18 +367,15 @@ contract StrategyDForceDAI {
         require(msg.sender == governance, "!governance");
         callfee = _fee;
     }
-    function setBurnFee(uint256 _fee) external{
-        require(msg.sender == governance, "!governance");
-        burnfee = _fee;
-    }
-    function setBurnAddress(address _burnAddress) public{
-        require(msg.sender == governance, "!governance");
-        burnAddress = _burnAddress;
-    }
 
     function setWithdrawalFee(uint _withdrawalFee) external {
         require(msg.sender == governance, "!governance");
         require(_withdrawalFee <=100,"fee >= 1%"); //max:1%
         withdrawalFee = _withdrawalFee;
+    }
+
+    function setPerformanceFee(uint _performanceFee) external {
+        require(msg.sender == governance, "!governance");
+        performanceFee = _performanceFee;
     }
 }
