@@ -177,7 +177,6 @@ contract StrategyDForceDAI {
     uint constant public withdrawalMax = 10000;
 
     address public governance;
-    address public strategyDev;
     address public controller;
     address public strategist;
 
