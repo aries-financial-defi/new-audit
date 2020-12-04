@@ -120,7 +120,7 @@ library SafeERC20 {
     }
 }
 
-interface Controller {
+interface IController {
     function vaults(address) external view returns (address);
     function rewards() external view returns (address);
 }
@@ -154,7 +154,7 @@ interface dERC20 {
     function getExchangeRate() external view returns (uint);
 }
 
-interface UniswapRouter {
+interface Uni {
     function swapExactTokensForTokens(uint, uint, address[] calldata, address, uint) external;
 }
 
@@ -167,17 +167,8 @@ contract StrategyDForceDAI {
     address constant public d = address(0x02285AcaafEB533e03A7306C55EC031297df9224);
     address constant public pool = address(0xD2fA07cD6Cd4A5A96aa86BacfA6E50bB3aaDBA8B);
     address constant public df = address(0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0);
-    address constant public output = address(0x431ad2ff6a9C365805eBaD47Ee021148d6f7DBe0);
-    address constant public unirouter = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
+    address constant public uni = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address constant public weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for df <> weth <> usdc route
-
-    address constant public afi = address(0xa1d0E215a23d7030842FC67cE582a6aFa3CCaB83);
-
-
-    uint public strategyfee = 0;
-    uint public fee = 400;
-    uint public callfee = 100;
-    uint constant public max = 1000;
 
     uint public performanceFee = 30000;
     uint constant public performanceMax = 30000;
@@ -188,32 +179,15 @@ contract StrategyDForceDAI {
     address public governance;
     address public strategyDev;
     address public controller;
+    address public strategist;
 
     string public getName;
 
-    address[] public swap2AFIRouting;
-    address[] public swap2TokenRouting;
-
-
-    constructor() public {
+    constructor(address _controller) public {
         governance = msg.sender;
-        controller = 0x8C2a19108d8F6aEC72867E9cfb1bF517601b515f;
-        getName = string(
-            abi.encodePacked("afi:Strategy:",
-            abi.encodePacked(IERC20(want).name(),"DF Token"
-            )
-            ));
-        swap2AFIRouting = [output,weth,afi];
-        swap2TokenRouting = [output,weth,want];
-        doApprove();
-        strategyDev = tx.origin;
+        strategist = msg.sender;
+        controller = _controller;
     }
-
-    function doApprove () public{
-        IERC20(output).safeApprove(unirouter, 0);
-        IERC20(output).safeApprove(unirouter, uint(-1));
-    }
-
 
     function deposit() public {
         uint _want = IERC20(want).balanceOf(address(this));
@@ -253,13 +227,26 @@ contract StrategyDForceDAI {
         uint _fee = 0;
         if (withdrawalFee>0){
             _fee = _amount.mul(withdrawalFee).div(withdrawalMax);
-            IERC20(want).safeTransfer(Controller(controller).rewards(), _fee);
+            IERC20(want).safeTransfer(IController(controller).rewards(), _fee);
         }
 
 
-        address _vault = Controller(controller).vaults(address(want));
+        address _vault = IController(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
         IERC20(want).safeTransfer(_vault, _amount.sub(_fee));
+    }
+
+    function _withdrawSome(uint256 _amount) internal returns (uint) {
+        uint _d = _amount.mul(1e18).div(dERC20(d).getExchangeRate());
+        uint _before = IERC20(d).balanceOf(address(this));
+        dRewards(pool).withdraw(_d);
+        uint _after = IERC20(d).balanceOf(address(this));
+        uint _withdrew = _after.sub(_before);
+        _before = IERC20(want).balanceOf(address(this));
+        dERC20(d).redeem(address(this), _withdrew);
+        _after = IERC20(want).balanceOf(address(this));
+        _withdrew = _after.sub(_before);
+        return _withdrew;
     }
 
     // Withdraw all funds, normally used when migrating strategies
@@ -270,7 +257,7 @@ contract StrategyDForceDAI {
 
         balance = IERC20(want).balanceOf(address(this));
 
-        address _vault = Controller(controller).vaults(address(want));
+        address _vault = IController(controller).vaults(address(want));
         require(_vault != address(0), "!vault"); // additional protection so we don't burn the funds
         IERC20(want).safeTransfer(_vault, balance);
     }
@@ -286,42 +273,24 @@ contract StrategyDForceDAI {
     function harvest() public {
         require(!Address.isContract(msg.sender),"!contract");
         dRewards(pool).getReward();
-
-        doswap();
-        dosplit();
-        deposit();
-    }
-
-    function doswap() internal {
-        uint256 _2token = IERC20(output).balanceOf(address(this)).mul(90).div(100); //90%
-        uint256 _2afi = IERC20(output).balanceOf(address(this)).mul(10).div(100);  //10%
-        UniswapRouter(unirouter).swapExactTokensForTokens(_2token, 0, swap2TokenRouting, address(this), now.add(1800));
-        UniswapRouter(unirouter).swapExactTokensForTokens(_2afi, 0, swap2AFIRouting, address(this), now.add(1800));
-    }
-    function dosplit() internal{
-        uint b = IERC20(afi).balanceOf(address(this));
-        uint _fee = b.mul(performanceFee).div(performanceMax);
-        uint _callfee = b.mul(callfee).div(max);
-        IERC20(afi).safeTransfer(Controller(controller).rewards(), _fee); //4%  3% team +1% insurance
-        IERC20(afi).safeTransfer(msg.sender, _callfee); //call fee 1%
-
-        if (strategyfee >0){
-            uint _strategyfee = b.mul(strategyfee).div(max);
-            IERC20(afi).safeTransfer(strategyDev, _strategyfee);
+        uint _df = IERC20(df).balanceOf(address(this));
+        if (_df > 0) {
+            IERC20(df).safeApprove(uni, 0);
+            IERC20(df).safeApprove(uni, _df);
+            
+            address[] memory path = new address[](3);
+            path[0] = df;
+            path[1] = weth;
+            path[2] = want;
+            Uni(uni).swapExactTokensForTokens(_df, 0, path, address(this), now.add(1800));
         }
-    }
 
-    function _withdrawSome(uint256 _amount) internal returns (uint) {
-        uint _d = _amount.mul(1e18).div(dERC20(d).getExchangeRate());
-        uint _before = IERC20(d).balanceOf(address(this));
-        dRewards(pool).withdraw(_d);
-        uint _after = IERC20(d).balanceOf(address(this));
-        uint _withdrew = _after.sub(_before);
-        _before = IERC20(want).balanceOf(address(this));
-        dERC20(d).redeem(address(this), _withdrew);
-        _after = IERC20(want).balanceOf(address(this));
-        _withdrew = _after.sub(_before);
-        return _withdrew;
+        uint _want = IERC20(want).balanceOf(address(this));
+        if (_want > 0) {
+            uint _fee = _want.mul(performanceFee).div(performanceMax);
+            IERC20(want).safeTransfer(IController(controller).rewards(), _fee);
+            deposit();
+        }
     }
 
     function balanceOfWant() public view returns (uint) {
@@ -355,17 +324,10 @@ contract StrategyDForceDAI {
         require(msg.sender == governance, "!governance");
         controller = _controller;
     }
-    function setFee(uint256 _fee) external{
+
+    function setStrategist(address _strategist) external {
         require(msg.sender == governance, "!governance");
-        fee = _fee;
-    }
-    function setStrategyFee(uint256 _fee) external{
-        require(msg.sender == governance, "!governance");
-        strategyfee = _fee;
-    }
-    function setCallFee(uint256 _fee) external{
-        require(msg.sender == governance, "!governance");
-        callfee = _fee;
+        strategist = _strategist;
     }
 
     function setWithdrawalFee(uint _withdrawalFee) external {
