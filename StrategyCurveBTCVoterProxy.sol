@@ -188,15 +188,15 @@ contract StrategyCurveBTCVoterProxy {
     using Address for address;
     using SafeMath for uint256;
 
-    address public constant want = address(0x075b1bb99792c9E1041bA13afEf80C91a1e70fB3);
-    address public constant pool = address(0xFA712EE4788C042e2B7BB55E6cb8ec569C4530c1);
-    address constant public mintr = address(0xd061D61a4d941c39E5453435B6345Dc261C2fcE0);
+    address public constant want = address(0x49849C98ae39Fff122806C06791Fa73784FB3675);
+    address public constant pool = address(0xB1F2cdeC61db658F091671F5f199635aEF202CAC);
+    address public constant mintr = address(0xd061D61a4d941c39E5453435B6345Dc261C2fcE0);
     address public constant crv = address(0xD533a949740bb3306d119CC777fa900bA034cd52);
     address public constant uni = address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D);
     address public constant weth = address(0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2); // used for crv <> weth <> wbtc route
 
     address public constant wbtc = address(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599);
-    address public constant curve = address(0x7fC77b5c7614E1533320Ea6DDc2Eb61fa00A9714);
+    address public constant curve = address(0x93054188d876f558f4a66B2EF1d97d16eDf0895B);
 
     uint256 public keepCRV = 1000;
     uint256 constant public keepCRVMax = 10000;
