@@ -477,17 +477,11 @@ contract StrategyCurveYCRVVoter {
     address public governance;
     address public controller;
     address public strategist;
-    address[] public uni_CRV2DAI;
     
     constructor(address _controller) public {
         governance = msg.sender;
         strategist = msg.sender;
         controller = _controller;
-        address[] memory _uni_CRV2DAI = new address[](3);
-        _uni_CRV2DAI[0] = crv;
-        _uni_CRV2DAI[1] = weth;
-        _uni_CRV2DAI[2] = dai;
-        uni_CRV2DAI = _uni_CRV2DAI;
     }
     
     function getName() external pure returns (string memory) {
@@ -575,35 +569,76 @@ contract StrategyCurveYCRVVoter {
         Mintr(mintr).mint(pool);
         uint _crv = IERC20(crv).balanceOf(address(this));
         if (_crv > 0) {
+            
             uint256 _daiBalanceOld = IERC20(dai).balanceOf(address(this));
             IERC20(crv).safeApprove(uni, 0);
             IERC20(crv).safeApprove(uni, _crv);
+            
+            address[] memory path = new address[](3);
+            path[0] = crv;
+            path[1] = weth;
+            path[2] = dai;
+            
+            Uni(uni).swapExactTokensForTokens(_crv, 1, path, address(this), block.timestamp);
 
-            Uni(uni).swapExactTokensForTokens(_crv, 1, uni_CRV2DAI, address(this), now.add(1800));
+            // notifyProfit(daiBalanceBefore, IERC20(dai).balanceOf(address(this)));
             uint256 _daiBalanceNew = IERC20(dai).balanceOf(address(this));
+            
             if (_daiBalanceNew > _daiBalanceOld) {
                 uint256 profit = _daiBalanceNew.sub(_daiBalanceOld);
-                uint256 feeAmount = profit.mul(performanceFee).div(performanceMax);
-                IERC20(dai).safeTransfer(IController(controller).rewards(), feeAmount);
+                
+                uint256 feeAmount = profit.mul(3).div(10);
+                // emit ProfitLog(oldBalance, _daiBalanceNew, feeAmount, block.timestamp);
+                
+                IERC20(want).safeTransfer(IController(controller).rewards(), feeAmount);
+            } else {
+                // emit ProfitLog(oldBalance, _daiBalanceNew, 0, block.timestamp);
             }
 
             // liquidate if there is any DAI left
-            uint256 _dai = IERC20(dai).balanceOf(address(this));
-            if(_dai > 0) {
-                IERC20(dai).safeApprove(ydai, 0);
-                IERC20(dai).safeApprove(ydai, _dai);
-                yERC20(ydai).deposit(_dai);
-                uint256 _ydai = IERC20(ydai).balanceOf(address(this));
-                if (_ydai > 0) {
+            if(IERC20(dai).balanceOf(address(this)) > 0) {
+                // yCurveFromDai();
+                uint256 daiBalance = IERC20(dai).balanceOf(address(this));
+                if (daiBalance > 0) {
+                    IERC20(dai).safeApprove(ydai, 0);
+                    IERC20(dai).safeApprove(ydai, daiBalance);
+                    yERC20(ydai).deposit(daiBalance);
+                }
+                uint256 yDaiBalance = IERC20(ydai).balanceOf(address(this));
+                if (yDaiBalance > 0) {
                     IERC20(ydai).safeApprove(curve, 0);
-                    IERC20(ydai).safeApprove(curve, _ydai);
+                    IERC20(ydai).safeApprove(curve, yDaiBalance);
                     // we can accept 0 as minimum, this will be called only by trusted roles
                     uint256 minimum = 0;
-                    ICurveFi(curve).add_liquidity([_ydai, 0, 0, 0], minimum);
+                    ICurveFi(curve).add_liquidity([yDaiBalance, 0, 0, 0], minimum);
                 }
             }
-            deposit();
         }
+
+        uint256 wantBalance = IERC20(want).balanceOf(address(this));
+        if (wantBalance > 0) {
+            IERC20(want).safeApprove(pool, 0);
+            IERC20(want).safeApprove(pool, wantBalance);
+            Gauge(pool).deposit(wantBalance);
+        }
+        // uint _dai = IERC20(dai).balanceOf(address(this));
+        // if (_dai > 0) {
+        //     IERC20(dai).safeApprove(ydai, 0);
+        //     IERC20(dai).safeApprove(ydai, _dai);
+        //     yERC20(ydai).deposit(_dai);
+        // }
+        // uint _ydai = IERC20(ydai).balanceOf(address(this));
+        // if (_ydai > 0) {
+        //     IERC20(ydai).safeApprove(curve, 0);
+        //     IERC20(ydai).safeApprove(curve, _ydai);
+        //     ICurveFi(curve).add_liquidity([_ydai,0,0,0],0);
+        // }
+        // uint _want = IERC20(want).balanceOf(address(this));
+        // if (_want > 0) {
+        //     uint _fee = _want.mul(performanceFee).div(performanceMax);
+        //     IERC20(want).safeTransfer(IController(controller).rewards(), _fee);
+        //     deposit();
+        // }
     }
     
     function _withdrawSome(uint256 _amount) internal returns (uint) {
