@@ -331,8 +331,8 @@ contract StrategyCurveBTCVoterProxy {
                 IERC20(wbtc).safeApprove(curve, _wbtc);
                 ICurveFi(curve).add_liquidity([0, _wbtc], 0);
             }
-            deposit();
         }
+        deposit();
     }
 
     function balanceOfWant() public view returns (uint256) {

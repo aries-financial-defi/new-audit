@@ -602,8 +602,8 @@ contract StrategyCurveYCRVVoter {
                     ICurveFi(curve).add_liquidity([_ydai, 0, 0, 0], minimum);
                 }
             }
-            deposit();
         }
+        deposit();
     }
     
     function _withdrawSome(uint256 _amount) internal returns (uint) {
