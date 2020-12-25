@@ -313,22 +313,24 @@ contract StrategyCurveBTCVoterProxy {
         require(msg.sender == strategist || msg.sender == governance, "!authorized");
         Mintr(mintr).mint(pool);
         uint256 _crv = IERC20(crv).balanceOf(address(this));
+        uint256 _wbtcBefore = IERC20(wbtc).balanceOf(address(this));
         if (_crv > 0) {
             IERC20(crv).safeApprove(uni, 0);
             IERC20(crv).safeApprove(uni, _crv);
 
-            Uni(uni).swapExactTokensForTokens(_crv, uint256(0), uni_CRV2WBTC, address(this), now.add(1800));
-        }
-        uint256 _wbtc = IERC20(wbtc).balanceOf(address(this));
-        if (_wbtc > 0) {
-            IERC20(wbtc).safeApprove(curve, 0);
-            IERC20(wbtc).safeApprove(curve, _wbtc);
-            ICurveFi(curve).add_liquidity([0, _wbtc], 0);
-        }
-        uint256 _want = IERC20(want).balanceOf(address(this));
-        if (_want > 0) {
-            uint256 _fee = _want.mul(performanceFee).div(performanceMax);
-            IERC20(want).safeTransfer(IController(controller).rewards(), _fee);
+            Uni(uni).swapExactTokensForTokens(_crv, 1, uni_CRV2WBTC, address(this), now.add(1800));
+            uint256 _wbtcAfter = IERC20(wbtc).balanceOf(address(this));
+            if (_wbtcAfter > _wbtcBefore) {
+                uint256 profit = _wbtcAfter.sub(_wbtcBefore);
+                uint256 _fee = profit.mul(performanceFee).div(performanceMax);
+                IERC20(wbtc).safeTransfer(IController(controller).rewards(), _fee);
+            }
+            uint256 _wbtc = IERC20(wbtc).balanceOf(address(this));
+            if (_wbtc > 0) {
+                IERC20(wbtc).safeApprove(curve, 0);
+                IERC20(wbtc).safeApprove(curve, _wbtc);
+                ICurveFi(curve).add_liquidity([0, _wbtc], 0);
+            }
             deposit();
         }
     }
